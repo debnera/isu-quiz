@@ -1,0 +1,91 @@
+Element Category;Error Description;Penalty Points
+LIFTS;Fall;-5
+LIFTS;Serious problems in the lifting process;-3
+LIFTS;Slight problems in the lifting process;-1 to -2
+LIFTS;Serious problems on the descent of the lift;-3 to -4
+LIFTS;Slight problems on the descent of the lift;-1 to -2
+LIFTS;Woman starts or lands on two feet;-2
+LIFTS;Poor positions in the air or landing;-1 to -3
+LIFTS;Awkward position(s);-1 to -3
+LIFTS;Poor speed and/or ice coverage;-1 to -3
+LIFTS;Poor turns by man and/or stops in rotation;-1 to -3
+LIFTS;Weak landing;-1 to -3
+LIFTS;Too long getting into a basic position or its variation;-1 to -3
+LIFTS;Touch down with the free foot;-1
+LIFTS;Long preparation;-1 to -2
+LIFTS;Poor take-off;-1 to -3
+TWIST LIFTS;Fall;-5
+TWIST LIFTS;Serious problems on the catch;-3 to -4
+TWIST LIFTS;Slight problems on the catch;-1 to -2
+TWIST LIFTS;Woman lands on two feet;-2 to -3
+TWIST LIFTS;Touch down with the free foot;-1
+TWIST LIFTS;Poor height or distance;-1 to -3
+TWIST LIFTS;Poor take-off (poor speed, serious scratching, no toe-pick);-1 to -3
+TWIST LIFTS;Weak landing (poor speed, bad positions);-1 to -2
+JUMP ELEMENTS, THROW JUMPS;Fall;-5
+JUMP ELEMENTS, THROW JUMPS;Landing on two feet;-3 to -4
+JUMP ELEMENTS, THROW JUMPS;Stepping out of landing in a jump;-3 to -4
+JUMP ELEMENTS, THROW JUMPS;Downgraded (sign <<);-2 to -4
+JUMP ELEMENTS, THROW JUMPS;Under-rotated (sign <);-2 to -3
+JUMP ELEMENTS, THROW JUMPS;Landed on the quarter (sign q);-2
+JUMP ELEMENTS, THROW JUMPS;"Multiple ""q"" signs in jump combo/seq";-3 to -4
+JUMP ELEMENTS, THROW JUMPS;Less than quarter missing (no sign);-2 to -4
+JUMP ELEMENTS, THROW JUMPS;Wrong edge take off F/Lz (sign *e);-2 to -4
+JUMP ELEMENTS, THROW JUMPS;Unclear edge take off F/Lz (sign †);-1 to -2
+JUMP ELEMENTS, THROW JUMPS;Unclear edge take off F/Lz (no sign);-1 to -2
+JUMP ELEMENTS, THROW JUMPS;Unequal number of revs by partners in 1 jump;-1 to -2
+JUMP ELEMENTS, THROW JUMPS;Unequal number of revs by partners in 2 or more jumps;-3 to -4
+JUMP ELEMENTS, THROW JUMPS;FS: Jump with no value in combo/seq (not with *);-3 to -4
+JUMP ELEMENTS, THROW JUMPS;Poor speed, height, distance, air position;-1 to -3
+JUMP ELEMENTS, THROW JUMPS;Big distance between partners – jump elements;-1 to -3
+JUMP ELEMENTS, THROW JUMPS;Poor take-off;-2 to -4
+JUMP ELEMENTS, THROW JUMPS;Loss of flow/direction/rhythm between jumps (combo/seq.);-1 to -3
+JUMP ELEMENTS, THROW JUMPS;Man's poor position at take-off – throw jump;-1 to -2
+JUMP ELEMENTS, THROW JUMPS;Weak landing (bad pos/wrong edge/scratching etc.);-1 to -3
+JUMP ELEMENTS, THROW JUMPS;Long preparation;-1 to -2
+JUMP ELEMENTS, THROW JUMPS;Euler executed as step over;-1 to -3
+JUMP ELEMENTS, THROW JUMPS;Touch down with both hands in a jump;-2 to -4
+JUMP ELEMENTS, THROW JUMPS;Touch down with one hand or free foot (including in between jumps);-1 to -2
+JUMP ELEMENTS, THROW JUMPS;Lack of Union;-1 to -3
+JUMP ELEMENTS, THROW JUMPS;Changes of edge in between jump combo/seq;-1 to -3
+JUMP ELEMENTS, THROW JUMPS;2 three turns in between – jump combo/seq.;-2 to -3
+SOLO AND PAIR SPINS;Fall;-5
+SOLO AND PAIR SPINS;Missing 1 or 2 revolutions;-1 to -2
+SOLO AND PAIR SPINS;Missing 3 or more revolutions;-3 to -4
+SOLO AND PAIR SPINS;Change of foot poorly done;-2 to -3
+SOLO AND PAIR SPINS;Poor fly and/or incorrect take-off or landing;-2 to -3
+SOLO AND PAIR SPINS;Poor exit;-1 to -3
+SOLO AND PAIR SPINS;Touch down with both hands;-2
+SOLO AND PAIR SPINS;Touch down with free foot or one hand;-1 to -2
+SOLO AND PAIR SPINS;Poor, weak or awkward position(s);-1 to -3
+SOLO AND PAIR SPINS;Travelling;-1 to -3
+SOLO AND PAIR SPINS;Slow or reduction of speed;-1 to -3
+SOLO AND PAIR SPINS;Stop or lack of continuous movement during spin (except when changing direction);-1 to -2
+SOLO AND PAIR SPINS;Big distance between partners;-1 to -3
+SOLO AND PAIR SPINS;Lack of Unison;-1 to -3
+SOLO AND PAIR SPINS;Loss of balance;-1 to -3
+SOLO AND PAIR SPINS;Does not correspond to the music;-1 to -3
+DEATH SPIRALS;Fall;-5
+DEATH SPIRALS;Poor pivot position (losing toe pick etc.);-2 to -4
+DEATH SPIRALS;Poor weak or awkward position of the woman. (too high/less than 1 rev in low position) or man;-1 to -3
+DEATH SPIRALS;Woman's or man's weak edge quality;-1 to -3
+DEATH SPIRALS;Any part of the woman's body (not the hair) touching the ice;-1 to -2
+DEATH SPIRALS;Slow or reduction of speed;-1 to -3
+DEATH SPIRALS;Poor entry or exit;-1 to -3
+STEPS;SP: Listed jumps of more than one revolution;-1
+STEPS;Fall;-5
+STEPS;Partly or fully does not correspond to the music;-1 to -4
+STEPS;Stumble;-1 to -3
+STEPS;Poor quality of steps and turns;-1 to -3
+STEPS;Small pattern;-1 to -3
+STEPS;Poor quality of body positions;-1 to -3
+STEPS;Lack of flow and energy;-1 to -3
+STEPS;Lack of Unison and spatial awareness;-1 to -3
+CHOREOGRAPHIC SEQUENCE;Fall;-5
+CHOREOGRAPHIC SEQUENCE;Partly or fully does not correspond to the music;-1 to -4
+CHOREOGRAPHIC SEQUENCE;Lack of connection between choreographic movements;-2 to -3
+CHOREOGRAPHIC SEQUENCE;Small pattern;-1 to -3
+CHOREOGRAPHIC SEQUENCE;Stumble;-1 to -3
+CHOREOGRAPHIC SEQUENCE;Loss of control/Lack of energy;-1 to -3
+CHOREOGRAPHIC SEQUENCE;Poor quality of movements/positions;-1 to -3
+CHOREOGRAPHIC SEQUENCE;Does not highlight choreography;-1 to -3
