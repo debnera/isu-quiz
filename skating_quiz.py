@@ -6,7 +6,11 @@ import sys
 import ctypes
 from PIL import Image
 
-VERSION = "V0.1.1"
+try:
+    from app_version import __version__
+except Exception:
+    __version__ = "0.0.0+unknown"
+VERSION = __version__
 WATERMARK_TEXT = f"Build: {VERSION} \t||\t Based on ISU Communication No. 2701 (2025/26)"
 APPID = f'debnera.skating.quiz.{VERSION}'
 
