@@ -5,7 +5,6 @@ import customtkinter as ctk
 import sys
 import ctypes
 from PIL import Image
-from version_update_checker import check_and_prompt_update_async
 
 try:
     from app_version import __version__
@@ -14,8 +13,6 @@ except Exception:
 VERSION = __version__
 WATERMARK_TEXT = f"Build: {VERSION} \t||\t Based on ISU Communication No. 2701 (2025/26)"
 APPID = f'debnera.skating.quiz.{VERSION}'
-GITHUB_OWNER = "debnera"
-GITHUB_REPO = "isu-quiz"
 
 # --- Data Layer ---
 class QuizLoader:
@@ -34,19 +31,16 @@ class QuizLoader:
             with open(self.filename, mode='r', encoding='ANSI') as f:
                 reader = csv.reader(f, delimiter=';')
                 next(reader, None) # Skip header
-                
+
                 for row in reader:
-                    # Expected csv format (example):
-                    # Category;Description;Answer
-                    # LIFTS;Long preparation;-1 to -2
                     if len(row) >= 3:
                         category = row[0].strip()
                         description = row[1].strip()
                         answer = row[2].strip()
-                        
+
                         if category not in self.data:
                             self.data[category] = []
-                        
+
                         self.data[category].append({
                             'question': description,
                             'answer': answer
@@ -62,7 +56,6 @@ class QuizLoader:
         return self.data.get(category, [])
 
     def get_all_answers(self):
-        # Return sorted unique answers (e.g., -1, -2, -3, -5)
         return sorted(list(self.all_possible_answers))
 
 # --- Logic Layer ---
@@ -81,7 +74,7 @@ class QuizEngine:
     def check_answer(self, user_answer):
         correct_answer = self.questions[self.current_index]['answer']
         is_correct = user_answer == correct_answer
-        
+
         if is_correct:
             if self.attempts_on_current == 0:
                 self.score += 1
@@ -92,47 +85,35 @@ class QuizEngine:
             self.attempts_on_current += 1
             return False
 
-# --- UI Layer ---
-class SkatingQuizUI:
-    def __init__(self, loader):
+# --- UI Layer (Screen) ---
+class PenaltiesQuizScreen(ctk.CTkFrame):
+    def __init__(self, master: ctk.CTk, loader: QuizLoader, on_back):
+        super().__init__(master)
+
         # Tell Windows this is a separate application to show the taskbar icon correctly
+        # (Main app sets its own AppUserModelID; leaving this here is harmless, but optional.)
         if os.name == 'nt':
-            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APPID)
+            try:
+                ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APPID)
+            except Exception:
+                pass
+
+        self.on_back = on_back
 
         # Load quiz data
         self.loader = loader
         self.engine = None
         self.possible_answers = self.loader.get_all_answers()
 
-        # Set up GUI window
-        ctk.set_appearance_mode("dark")
-        self.root = ctk.CTk()
-        self.root.title(f"Skating Penalty Quiz {VERSION}")
         self.buttons = None
         self.current_category_name = None
         self.feedback_label = None
 
-        # Icon Loading
-        try:
-            if os.name == 'nt':
-                icon_path = resource_path("skating.ico")
-                self.root.iconbitmap(icon_path)
-            else:
-                icon_path = resource_path("skating.png")
-
-                img = Image.open(icon_path)
-                photo = ctk.CTkImage(light_image=img, dark_image=img)
-                self.root.wm_iconphoto(True, photo)
-        except Exception as e:
-            print(f"Could not load icon: {e}")
-
-        self.root.geometry("800x600")
         self.setup_category_selection()
 
-        check_and_prompt_update_async(self.root, GITHUB_OWNER, GITHUB_REPO, VERSION)
 
     def draw_watermark(self):
-        ctk.CTkLabel(self.root, text=WATERMARK_TEXT,
+        ctk.CTkLabel(self, text=WATERMARK_TEXT,
                      font=("Arial", 10), text_color="gray50").place(relx=0.98, rely=0.98, anchor="se")
 
     def draw_logo(self):
@@ -141,12 +122,14 @@ class SkatingQuizUI:
             logo_image = ctk.CTkImage(light_image=Image.open(logo_path),
                                       dark_image=Image.open(logo_path),
                                       size=(100, 100))
-            logo_label = ctk.CTkLabel(self.root, image=logo_image, text="")
+            logo_label = ctk.CTkLabel(self, image=logo_image, text="")
             logo_label.place(x=20, y=20)
+            self._logo_ref = logo_image  # keep a reference
         except Exception as e:
             print(f"Could not load logo: {e}")
+
     def clear_screen(self):
-        for widget in self.root.winfo_children():
+        for widget in self.winfo_children():
             widget.destroy()
 
     def setup_category_selection(self):
@@ -154,9 +137,11 @@ class SkatingQuizUI:
         self.draw_watermark()
         self.draw_logo()
 
-        ctk.CTkLabel(self.root, text="Select Element Category", font=("Arial", 24, "bold")).pack(pady=30)
+        ctk.CTkLabel(self, text="Select Element Category", font=("Arial", 24, "bold")).pack(pady=30)
 
-        scroll_frame = ctk.CTkScrollableFrame(self.root, width=500, height=400)
+        ctk.CTkButton(self, text="Back to menu", command=self.on_back).pack(pady=(0, 10))
+
+        scroll_frame = ctk.CTkScrollableFrame(self, width=500, height=400)
         scroll_frame.pack(pady=10)
 
         for cat in self.loader.get_categories():
@@ -164,19 +149,17 @@ class SkatingQuizUI:
                           command=lambda c=cat: self.start_quiz(c)).pack(pady=5, fill="x", padx=20)
 
     def start_quiz(self, category):
-        questions = self.loader.get_questions(category).copy()  # Use copy to avoid changing original data
-        random.shuffle(questions)  # Shuffles the list in-place
+        questions = self.loader.get_questions(category).copy()
+        random.shuffle(questions)
         self.current_category_name = category
         self.engine = QuizEngine(questions)
         self.show_question()
 
     def draw_buttons(self):
-        # --- Draw guess buttons in a nice sorted grid ---
-        self.btn_frame = ctk.CTkFrame(self.root, fg_color="transparent")
+        self.btn_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.btn_frame.pack(pady=10)
         rows = {}
 
-        # 1. Group existing values and track found integers
         found_ints = []
         for val in self.possible_answers:
             base_str = val.split(' ')[0]
@@ -188,21 +171,16 @@ class SkatingQuizUI:
             except ValueError:
                 pass
 
-        # 2. Determine the full range (e.g., -1, -2, -3, -4) instead of (-1, -3, -4)
         if found_ints:
             min_val = min(found_ints)
             max_val = max(found_ints)
-            # Create a sequence from highest to lowest (e.g., -1, -2, -3, -4, -5)
             full_range_bases = [str(i) for i in range(max_val, min_val - 1, -1)]
         else:
             full_range_bases = sorted(rows.keys(), reverse=True)
 
-        # 3. Create buttons for each value in the grid
         self.buttons = {}
         for r_idx, base in enumerate(full_range_bases):
-            # Get existing values or just the base if none exist in CSV
             row_values = rows.get(base, [base])
-            # Ensure the singular value is always first in the row
             row_values = sorted(row_values, key=len)
 
             for c_idx, val in enumerate(row_values):
@@ -214,28 +192,29 @@ class SkatingQuizUI:
     def show_question(self):
         self.clear_screen()
         self.draw_watermark()
-        # self.draw_logo()
 
         q = self.engine.get_current_question()
         if not q:
             self.show_results()
             return
 
-        # Display Category Label above everything else
-        ctk.CTkLabel(self.root, text=self.current_category_name,
+        top_bar = ctk.CTkFrame(self, fg_color="transparent")
+        top_bar.pack(fill="x", pady=(10, 0), padx=12)
+
+        ctk.CTkButton(top_bar, text="Back to menu", command=self.on_back, width=140).pack(side="left")
+
+        ctk.CTkLabel(self, text=self.current_category_name,
                      font=("Arial", 16, "italic"), text_color="gray").pack(pady=(10, 0))
 
-        # Header with progress
         progress = f"Question {self.engine.current_index + 1} of {len(self.engine.questions)}"
-        ctk.CTkLabel(self.root, text=progress, font=("Arial", 12)).pack(pady=5)
+        ctk.CTkLabel(self, text=progress, font=("Arial", 12)).pack(pady=5)
 
-        # Display the Description as the question
-        question_label = ctk.CTkLabel(self.root, text=q['question'], font=("Arial", 20, "bold"), wraplength=700)
+        question_label = ctk.CTkLabel(self, text=q['question'], font=("Arial", 20, "bold"), wraplength=700)
         question_label.pack(pady=30)
 
         self.draw_buttons()
 
-        self.feedback_label = ctk.CTkLabel(self.root, text="", font=("Arial", 18, "bold"))
+        self.feedback_label = ctk.CTkLabel(self, text="", font=("Arial", 18, "bold"))
         self.feedback_label.pack(pady=30)
 
     def handle_press(self, choice):
@@ -243,9 +222,10 @@ class SkatingQuizUI:
 
         if is_correct:
             self.feedback_label.configure(text="CORRECT", text_color="#4CAF50")
-            for btn in self.buttons.values(): btn.configure(state="disabled")
+            for btn in self.buttons.values():
+                btn.configure(state="disabled")
             self.buttons[choice].configure(fg_color="#4CAF50")
-            self.root.after(700, self.show_question)
+            self.after(700, self.show_question)
         else:
             self.feedback_label.configure(text="WRONG", text_color="#F44336")
             self.buttons[choice].configure(fg_color="#F44336", state="disabled")
@@ -255,26 +235,29 @@ class SkatingQuizUI:
         self.draw_watermark()
         self.draw_logo()
 
-        ctk.CTkLabel(self.root, text="Quiz Results", font=("Arial", 32, "bold")).pack(pady=50)
+        ctk.CTkLabel(self, text="Quiz Results", font=("Arial", 32, "bold")).pack(pady=50)
         score_msg = f"Points: {self.engine.score} / {len(self.engine.questions)}"
-        ctk.CTkLabel(self.root, text=score_msg, font=("Arial", 24)).pack(pady=20)
-        ctk.CTkButton(self.root, text="Back to Categories", command=self.setup_category_selection).pack(pady=40)
+        ctk.CTkLabel(self, text=score_msg, font=("Arial", 24)).pack(pady=20)
 
-    def run(self):
-        self.root.mainloop()
+        ctk.CTkButton(self, text="Back to Categories", command=self.setup_category_selection).pack(pady=10)
+        ctk.CTkButton(self, text="Back to menu", command=self.on_back).pack(pady=10)
+
 
 def resource_path(relative_path):
-    # Get absolute path to resource, works for dev and for PyInstaller
     try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
         base_path = sys._MEIPASS
     except Exception:
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
 
+
 if __name__ == "__main__":
+    # This module is now intended to be imported by skating_main.py
     data_file = resource_path("quiz_data/pair-skating-minus.csv")
     loader = QuizLoader(data_file)
     if loader.get_categories():
-        app = SkatingQuizUI(loader)
-        app.run()
+        root = ctk.CTk()
+        root.geometry("800x600")
+        root.title(f"Skating Penalty Quiz {VERSION}")
+        PenaltiesQuizScreen(root, loader=loader, on_back=root.destroy).pack(fill="both", expand=True)
+        root.mainloop()

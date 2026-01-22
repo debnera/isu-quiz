@@ -21,7 +21,7 @@ except Exception:
     __version__ = "0.0.0+unknown"
 
 VERSION = __version__
-APPID = f'debnera.skating.recall.{VERSION}'
+APPID = f'debnera.skating.quiz.{VERSION}'
 WATERMARK_TEXT = f"Build: {VERSION} \t||\t Recall mode (learning-focused)"
 
 # ----------------------------
@@ -38,7 +38,7 @@ def resource_path(relative_path: str) -> str:
 _WORD_RE = re.compile(r"[a-z0-9]+", re.IGNORECASE)
 
 def normalize_for_compare(text: str) -> str:
-    """Lowercase, remove punctuation-ish noise, normalize whitespace."""
+    # Lowercase, remove punctuation-ish noise, normalize whitespace.
     text = text.lower()
     text = text.replace("’", "'").replace("–", "-").replace("—", "-")
     text = re.sub(r"[\(\)\[\]\{\}]", " ", text)
@@ -50,19 +50,16 @@ def tokenize(text: str) -> List[str]:
     return _WORD_RE.findall(normalize_for_compare(text))
 
 def token_variants(tok: str) -> List[str]:
-    """
-    Very lightweight plural tolerance:
-    - cats -> cat
-    - bodies -> body
-    Keeps original too.
-    """
+    # Very lightweight plural tolerance:
+    # - cats -> cat
+    # - bodies -> body
+    # Keeps original too.
     out = [tok]
     if len(tok) > 3:
         if tok.endswith("ies") and len(tok) > 4:
             out.append(tok[:-3] + "y")
         if tok.endswith("s") and not tok.endswith("ss"):
             out.append(tok[:-1])
-    # de-dup while preserving order
     seen = set()
     uniq = []
     for t in out:
@@ -79,9 +76,7 @@ def build_token_presence_set(tokens: List[str]) -> set:
     return s
 
 def similarity(user_text: str, correct_text: str) -> float:
-    """
-    Blend character similarity (typos) + token overlap (word-level robustness).
-    """
+    # Blend character similarity (typos) + token overlap (word-level robustness).
     u = normalize_for_compare(user_text)
     c = normalize_for_compare(correct_text)
 
@@ -107,7 +102,7 @@ def similarity(user_text: str, correct_text: str) -> float:
     return 0.65 * char_ratio + 0.35 * token_score
 
 def group_of_index(i: int) -> int:
-    """Expected indices are 0..5. Group 0 is top 3, group 1 is last 3."""
+    # Expected indices are 0..5. Group 0 is top 3, group 1 is last 3.
     return 0 if i < 3 else 1
 
 # ----------------------------
@@ -116,19 +111,17 @@ def group_of_index(i: int) -> int:
 
 @dataclass(frozen=True)
 class RecallItemSet:
-    """One quiz unit: 6 ordered descriptions for a component/category."""
+    # One quiz unit: 6 ordered descriptions for a component/category.
     category: str
     descriptions: List[str]  # length 6 (ordered)
 
 class RecallQuizLoader:
-    """
-    Loads a CSV where each row is:
-        Category ; Description
-
-    With the project rule:
-      - Each category has exactly 6 descriptions (no more, no less).
-      - Descriptions may optionally be prefixed with "1) ...", ..., "6) ...".
-    """
+    # Loads a CSV where each row is:
+    #     Category ; Description
+    #
+    # With the project rule:
+    #   - Each category has exactly 6 descriptions (no more, no less).
+    #   - Descriptions may optionally be prefixed with "1) ...", ..., "6) ...".
     def __init__(self, filename: str):
         self.filename = filename
         self.sets_by_category: Dict[str, List[RecallItemSet]] = {}
@@ -212,16 +205,14 @@ class MatchResult:
     sim: float
 
 def best_assignment(user_texts: List[str], correct_texts: List[str]) -> List[MatchResult]:
-    """
-    Compute best one-to-one assignment (size 6) with a learning-friendly objective:
-
-    Priority (highest to lowest):
-      1) remember all descriptions (maximize similarity)
-      2) correct group (top3 vs last3)
-      3) correct exact order inside group
-
-    We allow cross-group "steal" but with penalty.
-    """
+    # Compute best one-to-one assignment (size 6) with a learning-friendly objective:
+    #
+    # Priority (highest to lowest):
+    #   1) remember all descriptions (maximize similarity)
+    #   2) correct group (top3 vs last3)
+    #   3) correct exact order inside group
+    #
+    # We allow cross-group "steal" but with penalty.
     n = 6
     sims = [[similarity(user_texts[i], correct_texts[j]) for j in range(n)] for i in range(n)]
 
@@ -265,31 +256,33 @@ def best_assignment(user_texts: List[str], correct_texts: List[str]) -> List[Mat
 
 
 # ----------------------------
-# UI
+# UI (Screen)
 # ----------------------------
 
-class RecallQuizUI:
-    def __init__(self, loader: RecallQuizLoader):
-        if os.name == "nt":
-            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APPID)
+class RecallQuizScreen(ctk.CTkFrame):
+    def __init__(self, master: ctk.CTk, loader: "RecallQuizLoader", on_back):
+        super().__init__(master)
 
+        # Optional; main app sets its own AppUserModelID already.
+        if os.name == "nt":
+            try:
+                ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APPID)
+            except Exception:
+                pass
+
+        self.on_back = on_back
         self.loader = loader
 
-        ctk.set_appearance_mode("dark")
-        self.root = ctk.CTk()
-        self.root.title(f"Skating Recall Quiz {VERSION}")
-        self.root.geometry("1200x1000")
-
-        # icon
+        # icon (apply to the root/master, not the frame)
         try:
             if os.name == "nt":
                 icon_path = resource_path("skating.ico")
                 if os.path.exists(icon_path):
-                    self.root.iconbitmap(icon_path)
+                    master.iconbitmap(icon_path)
         except Exception:
             pass
 
-        self.current_set: Optional[RecallItemSet] = None
+        self.current_set: Optional["RecallItemSet"] = None
         self.entries: List[ctk.CTkEntry] = []
         self.status_labels: List[ctk.CTkLabel] = []
 
@@ -310,7 +303,7 @@ class RecallQuizUI:
         self.setup_category_selection()
 
     def draw_watermark(self) -> None:
-        ctk.CTkLabel(self.root, text=WATERMARK_TEXT, font=("Arial", 10),
+        ctk.CTkLabel(self, text=WATERMARK_TEXT, font=("Arial", 10),
                      text_color="gray50").place(relx=0.98, rely=0.98, anchor="se")
 
     def draw_logo(self) -> None:
@@ -322,14 +315,13 @@ class RecallQuizUI:
                 return
             img = Image.open(logo_path)
             logo = ctk.CTkImage(light_image=img, dark_image=img, size=(80, 80))
-            ctk.CTkLabel(self.root, image=logo, text="").place(x=20, y=20)
-            # keep reference
+            ctk.CTkLabel(self, image=logo, text="").place(x=20, y=20)
             self._logo_ref = logo
         except Exception:
             pass
 
     def clear_screen(self) -> None:
-        for widget in self.root.winfo_children():
+        for widget in self.winfo_children():
             widget.destroy()
 
     def setup_category_selection(self) -> None:
@@ -337,17 +329,19 @@ class RecallQuizUI:
         self.draw_watermark()
         self.draw_logo()
 
-        ctk.CTkLabel(self.root, text="Recall Mode: Positive Descriptions",
+        ctk.CTkLabel(self, text="Recall Mode: Positive Descriptions",
                      font=("Arial", 24, "bold")).pack(pady=(25, 10))
 
         ctk.CTkLabel(
-            self.root,
+            self,
             text="Type the 6 descriptions from memory. Typos/punctuation/plural forms are OK.",
             font=("Arial", 14),
             text_color="gray80"
-        ).pack(pady=(0, 15))
+        ).pack(pady=(0, 10))
 
-        scroll = ctk.CTkScrollableFrame(self.root, width=700, height=520)
+        ctk.CTkButton(self, text="Back to menu", command=self.on_back).pack(pady=(0, 15))
+
+        scroll = ctk.CTkScrollableFrame(self, width=700, height=520)
         scroll.pack(pady=10)
 
         for cat in self.loader.get_categories():
@@ -369,13 +363,17 @@ class RecallQuizUI:
         self.clear_screen()
         self.draw_watermark()
 
-        ctk.CTkLabel(self.root, text=self.current_set.category,
+        top_bar = ctk.CTkFrame(self, fg_color="transparent")
+        top_bar.pack(fill="x", pady=(10, 0), padx=12)
+        ctk.CTkButton(top_bar, text="Back to menu", command=self.on_back, width=140).pack(side="left")
+
+        ctk.CTkLabel(self, text=self.current_set.category,
                      font=("Arial", 18, "italic"), text_color="gray70").pack(pady=(10, 5))
 
-        ctk.CTkLabel(self.root, text="Write all 6 positive descriptions",
+        ctk.CTkLabel(self, text="Write all 6 positive descriptions",
                      font=("Arial", 22, "bold")).pack(pady=(0, 10))
 
-        container = ctk.CTkFrame(self.root, fg_color="transparent")
+        container = ctk.CTkFrame(self, fg_color="transparent")
         container.pack(fill="both", expand=True, padx=20, pady=10)
 
         # Two groups: top3 and last3
@@ -398,14 +396,12 @@ class RecallQuizUI:
             ctk.CTkLabel(row, text=f"{idx+1}.", width=30, anchor="w",
                          font=("Arial", 14, "bold")).pack(side="left")
 
-            # Stack entry + inline highlight vertically
             mid = ctk.CTkFrame(row, fg_color="transparent")
             mid.pack(side="left", fill="x", expand=True, padx=(8, 10))
 
             ent = ctk.CTkEntry(mid, height=34)
             ent.pack(side="top", fill="x", expand=True)
 
-            # Inline word highlight (read-only tk.Text)
             txt = tk.Text(
                 mid,
                 height=2,
@@ -435,23 +431,17 @@ class RecallQuizUI:
         for i in range(3, 6):
             add_row(bottom_frame, i)
 
-        # Reset border colors + clear inline highlights for a fresh attempt
         self._reset_entry_styles()
         self._clear_inline_highlights()
 
         controls = ctk.CTkFrame(container, fg_color="transparent")
         controls.pack(fill="x", padx=10, pady=(0, 10))
 
-        ctk.CTkButton(controls, text="Check",
-                      command=self.on_check).pack(side="left", padx=(0, 10))
-
-        # ctk.CTkButton(controls, text="New random set (same category)",
-        #               command=self.on_new_set).pack(side="left", padx=(0, 10))
+        ctk.CTkButton(controls, text="Check", command=self.on_check).pack(side="left", padx=(0, 10))
 
         ctk.CTkButton(controls, text="Back to categories",
                       command=self.setup_category_selection).pack(side="right")
 
-        # Bottom: correct answers reference ONLY
         self.correct_ref_frame = ctk.CTkScrollableFrame(container, height=220)
         self.correct_ref_frame.pack(fill="both", expand=True, padx=10, pady=(0, 10))
 
@@ -466,11 +456,10 @@ class RecallQuizUI:
             lbl.pack(anchor="w", padx=20, pady=2)
             self.correct_ref_labels.append(lbl)
 
-        # focus first entry
         self.entries[0].focus_set()
 
     def _reset_entry_styles(self) -> None:
-        """Return all entry boxes to a neutral look."""
+        # Return all entry boxes to a neutral look.
         for ent in self.entries:
             try:
                 ent.configure(border_color=self.COLOR_BORDER_DEFAULT)
@@ -485,7 +474,7 @@ class RecallQuizUI:
             txt.configure(state="disabled")
 
     def _fill_inline_highlight(self, row_index: int, user_text: str, correct_text: str) -> None:
-        """Render user's text with per-word colors compared to correct_text."""
+        # Render user's text with per-word colors compared to correct_text.
         txt = self.inline_highlights[row_index]
         txt.configure(state="normal")
         txt.delete("1.0", "end")
@@ -567,11 +556,9 @@ class RecallQuizUI:
                 self.correct_ref_labels[idx].configure(text=f"{idx+1}. {txt}")
 
     def _render_highlighted_text(self, parent: ctk.CTkFrame, base_text: str, other_text: str, mode: str) -> None:
-        """
-        Word-level highlight:
-        - In 'user' mode: green = words that appear in correct (plural-tolerant), red = extra words
-        - In 'correct' mode: green = words present in user, red = missing words
-        """
+        # Word-level highlight:
+        # - In 'user' mode: green = words that appear in correct (plural-tolerant), red = extra words
+        # - In 'correct' mode: green = words present in user, red = missing words
         txt = tk.Text(parent, height=2, wrap="word", bg="#1f1f1f", fg="#e0e0e0",
                       insertbackground="#e0e0e0", relief="flat")
         txt.pack(fill="x", expand=True, padx=8, pady=(0, 8))
@@ -604,12 +591,19 @@ class RecallQuizUI:
 
 
 def main() -> None:
+    # Standalone runner (optional; keep for quick testing)
+    ctk.set_appearance_mode("dark")
+    root = ctk.CTk()
+    root.title(f"Skating Recall Quiz {VERSION}")
+    root.geometry("1200x1000")
+
     data_file = resource_path("quiz_data/pair-skating-plus.csv")
     loader = RecallQuizLoader(data_file)
     if not loader.get_categories():
         raise RuntimeError("No categories/sets found in the plus CSV. Check format and encoding.")
-    app = RecallQuizUI(loader)
-    app.run()
+
+    RecallQuizScreen(root, loader=loader, on_back=root.destroy).pack(fill="both", expand=True)
+    root.mainloop()
 
 
 if __name__ == "__main__":
