@@ -7,7 +7,7 @@ import ctypes
 from PIL import Image
 
 VERSION = "V0.1"
-WATERMARK_TEXT = f"Build: {VERSION} \t||\t All text hopefully copied correctly from ISU Communication No. 2701 (2025/26)"
+WATERMARK_TEXT = f"Build: {VERSION} \t||\t Based on ISU Communication No. 2701 (2025/26)"
 APPID = f'debnera.skating.quiz.{VERSION}'
 
 # --- Data Layer ---
@@ -29,8 +29,11 @@ class QuizLoader:
                 next(reader, None) # Skip header
                 
                 for row in reader:
-                    # Expected format: Category;Description;Answer
-                    # Example: "LIFTS;Long preparation;-1 to -2"
+                    """
+                    Expected csv format (example): 
+                    Category;Description;Answer
+                    LIFTS;Long preparation;-1 to -2
+                    """
                     if len(row) >= 3:
                         category = row[0].strip()
                         description = row[1].strip()
@@ -91,15 +94,20 @@ class SkatingQuizUI:
         if os.name == 'nt':
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APPID)
 
+        # Load quiz data
         self.loader = loader
         self.engine = None
         self.possible_answers = self.loader.get_all_answers()
-        
+
+        # Set up GUI window
         ctk.set_appearance_mode("dark")
         self.root = ctk.CTk()
         self.root.title(f"Skating Penalty Quiz {VERSION}")
-        
-        # Simplified Icon Loading
+        self.buttons = None
+        self.current_category_name = None
+        self.feedback_label = None
+
+        # Icon Loading
         try:
             if os.name == 'nt':
                 icon_path = resource_path("skating.ico")
@@ -116,29 +124,28 @@ class SkatingQuizUI:
         self.root.geometry("800x600")
         self.setup_category_selection()
 
-    def _draw_watermark(self):
-        """Helper to consistently draw the watermark in the bottom right."""
+    def draw_watermark(self):
         ctk.CTkLabel(self.root, text=WATERMARK_TEXT, 
                      font=("Arial", 10), text_color="gray50").place(relx=0.98, rely=0.98, anchor="se")
 
+    def draw_logo(self):
+        try:
+            logo_path = resource_path("skating.png")
+            logo_image = ctk.CTkImage(light_image=Image.open(logo_path),
+                                      dark_image=Image.open(logo_path),
+                                      size=(100, 100))
+            logo_label = ctk.CTkLabel(self.root, image=logo_image, text="")
+            logo_label.place(x=20, y=20)
+        except Exception as e:
+            print(f"Could not load logo: {e}")
     def clear_screen(self):
         for widget in self.root.winfo_children():
             widget.destroy()
 
     def setup_category_selection(self):
         self.clear_screen()
-        self._draw_watermark()
-
-        # Add Logo in top left
-        try:
-            logo_path = resource_path("skating.png")
-            logo_image = ctk.CTkImage(light_image=Image.open(logo_path),
-                                          dark_image=Image.open(logo_path),
-                                          size=(100, 100))
-            logo_label = ctk.CTkLabel(self.root, image=logo_image, text="")
-            logo_label.place(x=20, y=20)
-        except Exception as e:
-            print(f"Could not load logo: {e}")
+        self.draw_watermark()
+        self.draw_logo()
 
         ctk.CTkLabel(self.root, text="Select Element Category", font=("Arial", 24, "bold")).pack(pady=30)
 
@@ -156,9 +163,51 @@ class SkatingQuizUI:
         self.engine = QuizEngine(questions)
         self.show_question()
 
+    def draw_buttons(self):
+        # --- Draw guess buttons in a nice sorted grid ---
+        self.btn_frame = ctk.CTkFrame(self.root, fg_color="transparent")
+        self.btn_frame.pack(pady=10)
+        rows = {}
+
+        # 1. Group existing values and track found integers
+        found_ints = []
+        for val in self.possible_answers:
+            base_str = val.split(' ')[0]
+            if base_str not in rows:
+                rows[base_str] = []
+            rows[base_str].append(val)
+            try:
+                found_ints.append(int(base_str))
+            except ValueError:
+                pass
+
+        # 2. Determine the full range (e.g., -1, -2, -3, -4) instead of (-1, -3, -4)
+        if found_ints:
+            min_val = min(found_ints)
+            max_val = max(found_ints)
+            # Create a sequence from highest to lowest (e.g., -1, -2, -3, -4, -5)
+            full_range_bases = [str(i) for i in range(max_val, min_val - 1, -1)]
+        else:
+            full_range_bases = sorted(rows.keys(), reverse=True)
+
+        # 3. Create buttons for each value in the grid
+        self.buttons = {}
+        for r_idx, base in enumerate(full_range_bases):
+            # Get existing values or just the base if none exist in CSV
+            row_values = rows.get(base, [base])
+            # Ensure the singular value is always first in the row
+            row_values = sorted(row_values, key=len)
+
+            for c_idx, val in enumerate(row_values):
+                btn = ctk.CTkButton(self.btn_frame, text=val, width=120, height=45,
+                                    command=lambda v=val: self.handle_press(v))
+                btn.grid(row=r_idx, column=c_idx, padx=8, pady=8)
+                self.buttons[val] = btn
+
     def show_question(self):
         self.clear_screen()
-        self._draw_watermark()
+        self.draw_watermark()
+        # self.draw_logo()
 
         q = self.engine.get_current_question()
         if not q:
@@ -177,46 +226,7 @@ class SkatingQuizUI:
         question_label = ctk.CTkLabel(self.root, text=q['question'], font=("Arial", 20, "bold"), wraplength=700)
         question_label.pack(pady=30)
 
-        self.btn_frame = ctk.CTkFrame(self.root, fg_color="transparent")
-        self.btn_frame.pack(pady=10)
-
-        # --- Dynamic Grid Logic with Gap Filling ---
-        rows = {}
-        found_ints = []
-        
-        # 1. Group existing values and track found integers
-        for val in self.possible_answers:
-            base_str = val.split(' ')[0]
-            if base_str not in rows:
-                rows[base_str] = []
-            rows[base_str].append(val)
-            
-            try:
-                found_ints.append(int(base_str))
-            except ValueError:
-                pass
-
-        # 2. Determine the full range (e.g., -1 to -5) and fill gaps
-        if found_ints:
-            min_val = min(found_ints)
-            max_val = max(found_ints)
-            # Create a sequence from highest to lowest (e.g., -1, -2, -3, -4, -5)
-            full_range_bases = [str(i) for i in range(max_val, min_val - 1, -1)]
-        else:
-            full_range_bases = sorted(rows.keys(), reverse=True)
-
-        self.buttons = {}
-        for r_idx, base in enumerate(full_range_bases):
-            # Get existing values or just the base if none exist in CSV
-            row_values = rows.get(base, [base])
-            # Ensure the singular value is always first in the row
-            row_values = sorted(row_values, key=len)
-            
-            for c_idx, val in enumerate(row_values):
-                btn = ctk.CTkButton(self.btn_frame, text=val, width=120, height=45,
-                                    command=lambda v=val: self.handle_press(v))
-                btn.grid(row=r_idx, column=c_idx, padx=8, pady=8)
-                self.buttons[val] = btn
+        self.draw_buttons()
 
         self.feedback_label = ctk.CTkLabel(self.root, text="", font=("Arial", 18, "bold"))
         self.feedback_label.pack(pady=30)
@@ -235,7 +245,8 @@ class SkatingQuizUI:
 
     def show_results(self):
         self.clear_screen()
-        self._draw_watermark()
+        self.draw_watermark()
+        self.draw_logo()
 
         ctk.CTkLabel(self.root, text="Quiz Results", font=("Arial", 32, "bold")).pack(pady=50)
         score_msg = f"Points: {self.engine.score} / {len(self.engine.questions)}"
