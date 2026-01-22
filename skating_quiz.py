@@ -26,7 +26,7 @@ class SkatingApp(ctk.CTk):
 
         ctk.set_appearance_mode("dark")
         self.title(f"Skating Trainer {VERSION}")
-        self.geometry("1000x800")
+        self.geometry("1300x1200")
 
         self._current_screen: ctk.CTkFrame | None = None
         self.show_main_menu()
