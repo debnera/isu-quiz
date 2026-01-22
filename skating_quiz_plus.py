@@ -124,8 +124,10 @@ class RecallQuizLoader:
     """
     Loads a CSV where each row is:
         Category ; Description
-    Description may contain a "1) ...", "2) ..." prefix.
-    We group rows into sets of 6, using the numeric prefix when present.
+
+    With the project rule:
+      - Each category has exactly 6 descriptions (no more, no less).
+      - Descriptions may optionally be prefixed with "1) ...", ..., "6) ...".
     """
     def __init__(self, filename: str):
         self.filename = filename
@@ -136,100 +138,61 @@ class RecallQuizLoader:
         if not os.path.exists(self.filename):
             raise FileNotFoundError(self.filename)
 
-        # We accept either "Category;Description" with/without header.
         rows: List[Tuple[str, str]] = []
         with open(self.filename, mode="r", encoding="ANSI") as f:
             reader = csv.reader(f, delimiter=";")
             for row in reader:
-                if not row:
-                    continue
                 if len(row) < 2:
                     continue
                 cat = row[0].strip()
                 desc = row[1].strip()
                 if not cat or not desc:
                     continue
-
-                # Skip obvious header line
                 if cat.lower() in {"element category", "category"}:
                     continue
-
                 rows.append((cat, desc))
 
-        # Group by category first
         by_cat: Dict[str, List[str]] = {}
         for cat, desc in rows:
             by_cat.setdefault(cat, []).append(desc)
 
         for cat, descs in by_cat.items():
-            sets = self._chunk_into_sets(cat, descs)
-            if sets:
-                self.sets_by_category[cat] = sets
+            item_set = self._parse_exact_six(cat, descs)
+            self.sets_by_category[cat] = [item_set]
 
-    def _chunk_into_sets(self, category: str, descs: List[str]) -> List[RecallItemSet]:
-        """
-        Strategy:
-        - If descriptions contain "1) ...", we start a new set whenever we see 1).
-        - Within a set, we place 1..6 by their number.
-        - If numbering is absent, we just chunk sequentially by 6.
-        """
+    def _parse_exact_six(self, category: str, descs: List[str]) -> RecallItemSet:
         number_re = re.compile(r"^\s*([1-6])\)\s*(.+?)\s*$")
 
-        numbered = []
-        for d in descs:
-            m = number_re.match(d)
+        if len(descs) != 6:
+            raise ValueError(
+                f"Category '{category}' must have exactly 6 descriptions, found {len(descs)}"
+            )
+
+        parsed: List[Optional[str]] = [None] * 6
+        saw_numbering = False
+
+        for raw in descs:
+            m = number_re.match(raw)
             if m:
+                saw_numbering = True
                 idx = int(m.group(1)) - 1
-                text = m.group(2).strip()
-                numbered.append((idx, text))
+                parsed[idx] = m.group(2).strip()
             else:
-                numbered.append((None, d.strip()))
+                # no numbering on this row; keep in original order (temporarily)
+                # we'll finalize below depending on whether numbering existed
+                pass
 
-        has_numbering = any(i is not None for i, _ in numbered)
+        if saw_numbering:
+            # Require all 1..6 to be present exactly once
+            if any(x is None for x in parsed):
+                raise ValueError(
+                    f"Category '{category}' uses numbering but is missing one of 1)..6)"
+                )
+            return RecallItemSet(category=category, descriptions=[x for x in parsed if x is not None])
 
-        sets: List[RecallItemSet] = []
-        if not has_numbering:
-            cleaned = [d.strip() for _, d in numbered if d.strip()]
-            for i in range(0, len(cleaned), 6):
-                chunk = cleaned[i:i + 6]
-                if len(chunk) == 6:
-                    sets.append(RecallItemSet(category=category, descriptions=chunk))
-            return sets
-
-        current: List[Optional[str]] = [None] * 6
-        filled = 0
-
-        def flush_if_complete() -> None:
-            nonlocal current, filled
-            if filled == 6 and all(x is not None for x in current):
-                sets.append(RecallItemSet(category=category, descriptions=[x for x in current if x is not None]))
-            current = [None] * 6
-            filled = 0
-
-        for idx, text in numbered:
-            if idx == 0:
-                flush_if_complete()
-
-            if idx is None:
-                # If there is numbering overall but this row lacks it, append into first empty slot.
-                for k in range(6):
-                    if current[k] is None:
-                        current[k] = text
-                        filled += 1
-                        break
-            else:
-                if current[idx] is None:
-                    current[idx] = text
-                    filled += 1
-
-            if filled == 6:
-                flush_if_complete()
-
-        # final flush
-        if filled == 6 and all(x is not None for x in current):
-            sets.append(RecallItemSet(category=category, descriptions=[x for x in current if x is not None]))
-
-        return sets
+        # No numbering: keep original order, just strip any whitespace
+        cleaned = [d.strip() for d in descs]
+        return RecallItemSet(category=category, descriptions=cleaned)
 
     def get_categories(self) -> List[str]:
         return sorted(self.sets_by_category.keys())
@@ -379,8 +342,7 @@ class RecallQuizUI:
 
         ctk.CTkLabel(
             self.root,
-            text="Type the 6 descriptions from memory. Typos/punctuation/plural forms are OK.\n"
-                 "Main goal: learn by seeing clear red/green differences.",
+            text="Type the 6 descriptions from memory. Typos/punctuation/plural forms are OK.",
             font=("Arial", 14),
             text_color="gray80"
         ).pack(pady=(0, 15))
