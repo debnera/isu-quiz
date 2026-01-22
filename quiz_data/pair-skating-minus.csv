@@ -25,14 +25,14 @@ TWIST LIFTS;Weak landing (poor speed, bad positions);-1 to -2
 JUMP ELEMENTS, THROW JUMPS;Fall;-5
 JUMP ELEMENTS, THROW JUMPS;Landing on two feet;-3 to -4
 JUMP ELEMENTS, THROW JUMPS;Stepping out of landing in a jump;-3 to -4
-JUMP ELEMENTS, THROW JUMPS;Downgraded (sign <<);-2 to -4
+JUMP ELEMENTS, THROW JUMPS;Downgraded (sign <<);-3 to -4
 JUMP ELEMENTS, THROW JUMPS;Under-rotated (sign <);-2 to -3
 JUMP ELEMENTS, THROW JUMPS;Landed on the quarter (sign q);-2
 JUMP ELEMENTS, THROW JUMPS;Multiple "q" signs in jump combo/seq;-3 to -4
-JUMP ELEMENTS, THROW JUMPS;Less than quarter missing (no sign);-2 to -4
+JUMP ELEMENTS, THROW JUMPS;Less than quarter missing (no sign);-1
 JUMP ELEMENTS, THROW JUMPS;Wrong edge take off F/Lz (sign e);-2 to -4
 JUMP ELEMENTS, THROW JUMPS;Unclear edge take off F/Lz (sign !);-1 to -2
-JUMP ELEMENTS, THROW JUMPS;Unclear edge take off F/Lz (no sign);-1 to -2
+JUMP ELEMENTS, THROW JUMPS;Unclear edge take off F/Lz (no sign);-1
 JUMP ELEMENTS, THROW JUMPS;Unequal number of revs by partners in 1 jump;-1 to -2
 JUMP ELEMENTS, THROW JUMPS;Unequal number of revs by partners in 2 or more jumps;-3 to -4
 JUMP ELEMENTS, THROW JUMPS;FS: Jump with no value in combo/seq (not with *);-3 to -4
@@ -42,13 +42,13 @@ JUMP ELEMENTS, THROW JUMPS;Poor take-off;-2 to -4
 JUMP ELEMENTS, THROW JUMPS;Loss of flow/direction/rhythm between jumps (combo/seq.);-1 to -3
 JUMP ELEMENTS, THROW JUMPS;Man's poor position at take-off - throw jump;-1 to -2
 JUMP ELEMENTS, THROW JUMPS;Weak landing (bad pos/wrong edge/scratching etc.);-1 to -3
-JUMP ELEMENTS, THROW JUMPS;Long preparation;-1 to -2
+JUMP ELEMENTS, THROW JUMPS;Long preparation;-1 to -3
 JUMP ELEMENTS, THROW JUMPS;Euler executed as step over;-1 to -3
-JUMP ELEMENTS, THROW JUMPS;Touch down with both hands in a jump;-2 to -4
+JUMP ELEMENTS, THROW JUMPS;Touch down with both hands in a jump;-2 to -3
 JUMP ELEMENTS, THROW JUMPS;Touch down with one hand or free foot (including in between jumps);-1 to -2
-JUMP ELEMENTS, THROW JUMPS;Lack of Union;-1 to -3
-JUMP ELEMENTS, THROW JUMPS;Changes of edge in between jump combo/seq;-1 to -3
-JUMP ELEMENTS, THROW JUMPS;2 three turns in between - jump combo/seq.;-2 to -3
+JUMP ELEMENTS, THROW JUMPS;Lack of unison;-1 to -3
+JUMP ELEMENTS, THROW JUMPS;Changes of edge in between jump combo/seq;-1 to -2
+JUMP ELEMENTS, THROW JUMPS;2 three turns in between - jump combo/seq;-2 to -3
 SOLO AND PAIR SPINS;Fall;-5
 SOLO AND PAIR SPINS;Missing 1 or 2 revolutions;-1 to -2
 SOLO AND PAIR SPINS;Missing 3 or more revolutions;-3 to -4
