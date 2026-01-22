@@ -5,6 +5,7 @@ import customtkinter as ctk
 import sys
 import ctypes
 from PIL import Image
+from version_update_checker import check_and_prompt_update_async
 
 try:
     from app_version import __version__
@@ -13,6 +14,8 @@ except Exception:
 VERSION = __version__
 WATERMARK_TEXT = f"Build: {VERSION} \t||\t Based on ISU Communication No. 2701 (2025/26)"
 APPID = f'debnera.skating.quiz.{VERSION}'
+GITHUB_OWNER = "debnera"
+GITHUB_REPO = "isu-quiz"
 
 # --- Data Layer ---
 class QuizLoader:
@@ -126,8 +129,10 @@ class SkatingQuizUI:
         self.root.geometry("800x600")
         self.setup_category_selection()
 
+        check_and_prompt_update_async(self.root, GITHUB_OWNER, GITHUB_REPO, VERSION)
+
     def draw_watermark(self):
-        ctk.CTkLabel(self.root, text=WATERMARK_TEXT, 
+        ctk.CTkLabel(self.root, text=WATERMARK_TEXT,
                      font=("Arial", 10), text_color="gray50").place(relx=0.98, rely=0.98, anchor="se")
 
     def draw_logo(self):
