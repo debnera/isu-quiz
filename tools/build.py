@@ -13,7 +13,7 @@ PYINSTALLER_ARGS = [
     "--add-data", "skating.ico;.",
     "--icon=skating.ico",
     "-y",  # Delete the previous build directory without asking
-    "skating_trainer_app.py",
+    "skating_quiz.py",
 ]
 
 def run(cmd: list[str]) -> None:
