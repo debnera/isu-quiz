@@ -6,7 +6,7 @@ import sys
 import ctypes
 from PIL import Image
 
-VERSION = "V0.1"
+VERSION = "V0.1.1"
 WATERMARK_TEXT = f"Build: {VERSION} \t||\t Based on ISU Communication No. 2701 (2025/26)"
 APPID = f'debnera.skating.quiz.{VERSION}'
 
@@ -29,11 +29,9 @@ class QuizLoader:
                 next(reader, None) # Skip header
                 
                 for row in reader:
-                    """
-                    Expected csv format (example): 
-                    Category;Description;Answer
-                    LIFTS;Long preparation;-1 to -2
-                    """
+                    # Expected csv format (example):
+                    # Category;Description;Answer
+                    # LIFTS;Long preparation;-1 to -2
                     if len(row) >= 3:
                         category = row[0].strip()
                         description = row[1].strip()
@@ -257,7 +255,7 @@ class SkatingQuizUI:
         self.root.mainloop()
 
 def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
+    # Get absolute path to resource, works for dev and for PyInstaller
     try:
         # PyInstaller creates a temp folder and stores path in _MEIPASS
         base_path = sys._MEIPASS
