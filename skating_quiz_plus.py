@@ -315,7 +315,7 @@ class RecallQuizUI:
         ctk.set_appearance_mode("dark")
         self.root = ctk.CTk()
         self.root.title(f"Skating Recall Quiz {VERSION}")
-        self.root.geometry("1000x800")
+        self.root.geometry("1200x1000")
 
         # icon
         try:
