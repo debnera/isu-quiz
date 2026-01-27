@@ -8,6 +8,8 @@ ROOT = Path(__file__).resolve().parents[1]
 
 PYINSTALLER_ARGS = [
     "--noconsole",
+    "--clean",
+    "--noupx",
     "--add-data", "quiz_data;quiz_data",
     "--add-data", "skating.png;.",
     "--add-data", "skating.ico;.",
@@ -33,7 +35,7 @@ def zip_dist(app_name: str, version: str) -> Path:
     exe_candidate = dist_dir / f"{app_name}.exe"
 
     base_name = dist_dir / f"{app_name}-{version}-windows"
-    zip_path = base_name.with_suffix(".zip")
+    zip_path = dist_dir / f"{app_name}-{version}-windows.zip"
 
     if zip_path.exists():
         zip_path.unlink()
