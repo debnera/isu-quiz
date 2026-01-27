@@ -22,7 +22,7 @@ except Exception:
 
 VERSION = __version__
 APPID = f'debnera.skating.quiz.{VERSION}'
-WATERMARK_TEXT = f"Build: {VERSION} \t||\t Recall mode (learning-focused)"
+WATERMARK_TEXT = f"Build: {VERSION} \t||\t Based on ISU Communication No. 2701 (2025/26)"
 
 # ----------------------------
 # Utilities

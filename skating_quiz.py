@@ -26,7 +26,7 @@ class SkatingApp(ctk.CTk):
 
         ctk.set_appearance_mode("dark")
         self.title(f"Skating Trainer {VERSION}")
-        self.geometry("1300x1200")
+        self.geometry("1200x1000")
 
         self._current_screen: ctk.CTkFrame | None = None
         self.show_main_menu()
@@ -43,19 +43,19 @@ class SkatingApp(ctk.CTk):
         self._set_screen(MainMenuScreen(self, on_pick=self.start_route))
 
     def start_route(self, discipline: str, mode: str) -> None:
-        # Only pair is implemented right now.
-        if discipline != "pair":
+        print(f"Starting route for discipline: {discipline}, mode: {mode}")
+        if discipline != "pair" and discipline != "single":
             self._set_screen(NotImplementedScreen(self, on_back=self.show_main_menu))
             return
 
         if mode == "penalties":
-            data_file = quiz_resource_path("quiz_data/pair-skating-minus.csv")
+            data_file = quiz_resource_path(f"quiz_data/{discipline}-skating-minus.csv")
             loader = QuizLoader(data_file)
             self._set_screen(PenaltiesQuizScreen(self, loader=loader, on_back=self.show_main_menu))
             return
 
         if mode == "recall":
-            data_file = recall_resource_path("quiz_data/pair-skating-plus.csv")
+            data_file = recall_resource_path(f"quiz_data/{discipline}-skating-plus.csv")
             loader = RecallQuizLoader(data_file)
             self._set_screen(RecallQuizScreen(self, loader=loader, on_back=self.show_main_menu))
             return
@@ -87,21 +87,20 @@ class MainMenuScreen(ctk.CTkFrame):
 
         # Penalties column
         add_btn("Pair skating penalties", "pair", "penalties", 0, 0, True)
-        add_btn("Solo skating penalties", "solo", "penalties", 1, 0, False)
-        add_btn("ETC penalties",          "etc",  "penalties", 2, 0, False)
+        add_btn("Single skating penalties", "single", "penalties", 1, 0, True)
+        add_btn("Ice dancing penalties",          "etc",  "penalties", 2, 0, False)
 
-        # Recall column
-        add_btn("Pair skating recall", "pair", "recall", 0, 1, True)
-        add_btn("Solo skating recall", "solo", "recall", 1, 1, False)
-        add_btn("ETC recall",          "etc",  "recall", 2, 1, False)
+        # GOE plus bullets column
+        add_btn("Pair skating plus bullets", "pair", "recall", 0, 1, True)
+        add_btn("Single skating plus bullets", "single", "recall", 1, 1, True)
+        add_btn("Ice dancing plus bullets",          "etc",  "recall", 2, 1, False)
 
 
 class NotImplementedScreen(ctk.CTkFrame):
     def __init__(self, master: ctk.CTk, on_back):
         super().__init__(master)
         ctk.CTkLabel(self, text="Not implemented yet", font=("Arial", 26, "bold")).pack(pady=(60, 10))
-        ctk.CTkLabel(self, text="Only Pair skating is available right now.",
-                     font=("Arial", 14), text_color="gray80").pack(pady=(0, 25))
+
         ctk.CTkButton(self, text="Back to menu", command=on_back, width=220, height=45).pack()
 
 

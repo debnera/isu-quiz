@@ -1,0 +1,53 @@
+Element Category;Error Description;Penalty Points
+JUMP ELEMENTS; SP: Jump element with * or not according to requirements final GOE must be GOE;-5
+JUMP ELEMENTS; Poor take-off;-2 to -4
+JUMP ELEMENTS; Fall;-5
+JUMP ELEMENTS; Euler executed as step over;-1 to -3
+JUMP ELEMENTS; Landing on two feet in a jump;-3 to -4
+JUMP ELEMENTS; Changes of edge in between jump combo/seq;-1 to -2
+JUMP ELEMENTS; Stepping out of landing in a jump;-3 to -4
+JUMP ELEMENTS; 2 three turns in between (jump combo/seq.);-2 to -3
+JUMP ELEMENTS; Downgraded (sign << );-3 to -4
+JUMP ELEMENTS; Poor speed, height, distance, or air position;-1 to -3
+JUMP ELEMENTS; Under-rotated (sign < );-2 to -3
+JUMP ELEMENTS; Touch down with both hands in a jump;-2 to -3
+JUMP ELEMENTS; Landed on the quarter (sign q);-2
+JUMP ELEMENTS; Touch down with one hand or free foot (including in between jumps);-1 to -2
+JUMP ELEMENTS; Multiple "q" signs in jump combo/seq;-3 to -4
+JUMP ELEMENTS; Loss of flow/direction/rhythm between jumps (combo/seq.);-1 to -3
+JUMP ELEMENTS; Less than quarter missing (no sign);-1
+JUMP ELEMENTS; Weak landing (bad pos./wrong edge/scratching etc);-1 to -3
+JUMP ELEMENTS; Wrong edge take off F/Lz (sign e);-2 to -4
+JUMP ELEMENTS; Long preparation;-1 to -3
+JUMP ELEMENTS; Unclear edge take off F/Lz (sign !);-1 to -2
+JUMP ELEMENTS; FS: Jump with no value in combo/seq (not with *);-3 to -4
+JUMP ELEMENTS; Unclear edge take off F/Lz (no sign);-1
+SPINS;Fall;-5
+SPINS;Poor, weak or awkward position(s);-1 to -3
+SPINS;Missing 1 or 2 revolutions;-1 to -2
+SPINS;Slow or reduction of speed;-1 to -3
+SPINS;Missing 3 or more revolutions;-3 to -4
+SPINS;Touch down with free foot or hand(s);-1 to -3
+SPINS;Change of foot poorly done (including curve of entry/exit except when changing direction);-2 to -3
+SPINS;Loss of balance;-1 to -3
+SPINS;Poor fly and/or incorrect take-off or landing;-2 to -3
+SPINS;Unbalanced number of revolutions in change foot spin;-1
+SPINS;Traveling;-1 to -3
+SPINS;Does not correspond to the music;-1 to -3
+SPINS;Poor exit;-1 to -3
+STEPS;SP: Listed jumps of more than one revolution;-1
+STEPS;Poor quality of steps and turns;-1 to -3
+STEPS;Fall;-5
+STEPS;Poor quality of body positions;-1 to -3
+STEPS;Partly or fully does not correspond to the music;-1 to -4
+STEPS;Lack of flow and energy;-1 to -3
+STEPS;Stumble;-1 to -3
+STEPS;Small pattern;-1 to -3
+CHOREOGRAPHIC SEQUENCE;Fall;-5
+CHOREOGRAPHIC SEQUENCE;Stumble;-1 to -3
+CHOREOGRAPHIC SEQUENCE;Partly or fully does not correspond to the music;-1 to -4
+CHOREOGRAPHIC SEQUENCE;Loss of control/Lack of energy;-1 to -3
+CHOREOGRAPHIC SEQUENCE;Lack of connection between choreographic movements;-2 to -3
+CHOREOGRAPHIC SEQUENCE;Poor quality of movements/positions;-1 to -3
+CHOREOGRAPHIC SEQUENCE;Small pattern;-1 to -3
+CHOREOGRAPHIC SEQUENCE;Does not highlight choreography;-1 to -3

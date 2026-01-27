@@ -257,7 +257,7 @@ if __name__ == "__main__":
     loader = QuizLoader(data_file)
     if loader.get_categories():
         root = ctk.CTk()
-        root.geometry("800x600")
+        root.geometry("1200x1000")
         root.title(f"Skating Penalty Quiz {VERSION}")
         PenaltiesQuizScreen(root, loader=loader, on_back=root.destroy).pack(fill="both", expand=True)
         root.mainloop()
