@@ -22,6 +22,8 @@ TWIST LIFTS;Touch down with the free foot;-1
 TWIST LIFTS;Poor height or distance;-1 to -3
 TWIST LIFTS;Poor take-off (poor speed, serious scratching, no toe-pick);-1 to -3
 TWIST LIFTS;Weak landing (poor speed, bad positions);-1 to -2
+TWIST LIFTS;Downgraded (sign <<); -2 to -4
+TWIST LIFTS;Long preparation; -1 to -2
 JUMP ELEMENTS, THROW JUMPS;Fall;-5
 JUMP ELEMENTS, THROW JUMPS;Landing on two feet;-3 to -4
 JUMP ELEMENTS, THROW JUMPS;Stepping out of landing in a jump;-3 to -4
